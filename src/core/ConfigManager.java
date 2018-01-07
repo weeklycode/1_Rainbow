@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ConfigManager {
-	
+
 	HashMap<String,String> data;
 
-	public ConfigManager(String filename){
+	public ConfigManager(String filepath){
 		try{
 
-			File f = new File(filename);
+			File f = new File(filepath);
 
 			if (!f.exists()){
 				//create config file
@@ -33,8 +33,12 @@ public class ConfigManager {
 			readIn(f);
 
 		}catch(IOException e){
-			e.printStackTrace();
-			readIn();//uses def config file
+			try{
+				readIn();//use def config file
+			}catch(IOException e2){
+				e2.printStackTrace();
+			}
+			System.out.println("no config.conf file, using default");
 		}
 	}
 
@@ -49,15 +53,31 @@ public class ConfigManager {
 				lines.add(temp.toString());
 				temp = new StringBuilder();
 			}else{
-				temp.append(c);
+				temp.append((char)c);
 			}
 		}
+		lines.add(temp.toString());
 		fr.close();
 		readIn(lines);
 	}
 
-	private void readIn(){
-		//TODO
+	private void readIn() throws IOException{
+		StringBuilder temp = new StringBuilder();
+		List<String> lines = new ArrayList<String>();
+		InputStream fr = this.getClass().getResourceAsStream("/core/def.conf");
+		int c;
+		while (fr.available()>0){
+			c=fr.read();
+			if (c == (int)'\n'){
+				lines.add(temp.toString());
+				temp = new StringBuilder();
+			}else{
+				temp.append((char)c);
+			}
+		}
+		lines.add(temp.toString());
+		fr.close();
+		readIn(lines);
 	}
 
 	private void readIn(List<String> lines){
@@ -66,11 +86,19 @@ public class ConfigManager {
 		String[] temp2;
 		for (String line : lines){
 			temp = line.toUpperCase().replace(" ", "").replace("\t", "");
-			if (temp.charAt(0) == '#'){
+			if (temp.charAt(0) == '#' || !temp.contains(":")){
 				continue;
 			}
 			temp2 = temp.split(":");
 			data.put(temp2[0], temp2[1]);
 		}
+	}
+	
+	public double getNumber(String keyword){
+		return Double.parseDouble(data.get(keyword.toUpperCase()));
+	}
+	
+	public String getString(String keyword){
+		return data.get(keyword.toUpperCase());
 	}
 }

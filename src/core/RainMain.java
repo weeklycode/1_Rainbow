@@ -1,8 +1,6 @@
 package core;
 
 import java.awt.image.BufferedImage;
-import java.net.URISyntaxException;
-import java.util.Random;
 
 import javax.swing.JFrame;
 
@@ -12,36 +10,32 @@ public class RainMain {
 
 	public static void main(String[] args){
 
-		/*String path = "";
-		try{
-			path = RainMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-		}catch (URISyntaxException e){
-			e.printStackTrace();
-		}
+		String path = "./";
 
-		ConfigManager cman = new ConfigManager(path + "config.conf");*/
+		ConfigManager cman = new ConfigManager(path + "config.conf");
 
 		JFrame jf = new JFrame("Rainbow");
-		Random r = new Random();
-		jf.setSize(r.nextInt(1000)+200,r.nextInt(1000)+200);
-		double reps = 2.5;
-		double speed = 15;
+		jf.setSize((int)cman.getNumber("WIDTH"),(int)cman.getNumber("HEIGHT"));
+		double reps = cman.getNumber("REPETITIONS");
+		double speed = cman.getNumber("SPEED");
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.setVisible(true);
-		BufferedImage bi = new BufferedImage(jf.getWidth(), jf.getHeight(), BufferedImage.TYPE_INT_RGB);//uses one byte per rgb data, 3 bytes per pixel		
+		BufferedImage bi;
 		double[] rgb = {255,0,0};
 		int phase = 0;
 		double[] initrgb = rgb.clone();//equal to rgb, but not a pointer
 		int initphase = phase;//primitive data type; no need to clone
 		double change;
-		if (reps>1){
-			change = (255*5+255*6*(reps-1))/(bi.getWidth()+bi.getHeight()-2);
-		}else{
-			change = (255*5*reps)/(bi.getWidth()+bi.getHeight()-2);
-		}
 		double[] nextrgb = rgb.clone();
 		int nextphase = phase;
-		while (true){
+		do{
+			bi = new BufferedImage(jf.getWidth(), jf.getHeight(), BufferedImage.TYPE_INT_RGB);//uses one byte per rgb data, 3 bytes per pixel
+			if (reps>1){
+				change = (255*5+255*6*(reps-1))/(bi.getWidth()+bi.getHeight()-2);
+			}else{
+				change = (255*5*reps)/(bi.getWidth()+bi.getHeight()-2);
+			}
+
 			for (int y = 0; y<bi.getHeight(); y++){
 				for (int x = 0; x<bi.getWidth(); x++){
 					bi.setRGB(x, y, ((int)rgb[0]<<16) | ((int)rgb[1]<<8) | (int)rgb[2]);
@@ -61,8 +55,8 @@ public class RainMain {
 			}catch (InterruptedException e){
 				e.printStackTrace();
 			}
-			
-		}
+
+		} while(speed>0);
 	}
 
 
