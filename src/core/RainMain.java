@@ -24,8 +24,8 @@ public class RainMain {
 		JFrame jf = new JFrame("Rainbow");
 		Random r = new Random();
 		jf.setSize(r.nextInt(1000)+200,r.nextInt(1000)+200);
-		System.out.printf("width=%d, height=%d\n",jf.getWidth(),jf.getHeight());
 		double reps = 2.5;
+		double speed = 15;
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.setVisible(true);
 		BufferedImage bi = new BufferedImage(jf.getWidth(), jf.getHeight(), BufferedImage.TYPE_INT_RGB);//uses one byte per rgb data, 3 bytes per pixel		
@@ -39,18 +39,30 @@ public class RainMain {
 		}else{
 			change = (255*5*reps)/(bi.getWidth()+bi.getHeight()-2);
 		}
-		for (int y = 0; y<bi.getHeight(); y++){
-			for (int x = 0; x<bi.getWidth(); x++){
-				bi.setRGB(x, y, ((int)rgb[0]<<16) | ((int)rgb[1]<<8) | (int)rgb[2]);
-				phase=next(phase,rgb,change);
+		double[] nextrgb = rgb.clone();
+		int nextphase = phase;
+		while (true){
+			for (int y = 0; y<bi.getHeight(); y++){
+				for (int x = 0; x<bi.getWidth(); x++){
+					bi.setRGB(x, y, ((int)rgb[0]<<16) | ((int)rgb[1]<<8) | (int)rgb[2]);
+					phase=next(phase,rgb,change);
+				}
+
+				initphase = next(initphase,initrgb,change);
+				phase=initphase;
+				rgb=initrgb.clone();
+			}
+			jf.getGraphics().drawImage(bi, 0, 0, null);
+			try{
+				Thread.sleep(20);
+				nextphase = next(nextphase,nextrgb,speed);
+				rgb = (initrgb = nextrgb.clone()).clone();
+				phase = (initphase = nextphase);
+			}catch (InterruptedException e){
+				e.printStackTrace();
 			}
 			
-			initphase = next(initphase,initrgb,change);
-			phase=initphase;
-			rgb=initrgb.clone();
 		}
-		jf.getGraphics().drawImage(bi, 0, 0, null);
-
 	}
 
 
